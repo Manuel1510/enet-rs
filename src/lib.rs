@@ -48,7 +48,7 @@ use std::{
     },
 };
 
-use enet_sys::{enet_deinitialize, enet_host_create, enet_initialize, enet_linked_version};
+use enet_sys::{enet_deinitialize, enet_host_create, enet_initialize, enet_linked_version, enet_crc32};
 
 mod address;
 mod event;
@@ -174,6 +174,13 @@ impl Enet {
         if inner.is_null() {
             return Err(Error(0));
         }
+
+        /* SAFETY: inner is a non-null pointer returned by enet_host_create,
+            enet_crc32 is a function pointer from enet_sys
+        */
+        (unsafe {
+            *inner
+        }).checksum = Some(enet_crc32);
 
         Ok(Host::new(self.keep_alive.clone(), inner))
     }

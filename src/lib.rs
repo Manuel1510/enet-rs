@@ -48,7 +48,7 @@ use std::{
     },
 };
 
-use enet_sys::{enet_deinitialize, enet_host_create, enet_initialize, enet_linked_version, enet_crc32};
+use enet_sys::{enet_deinitialize, enet_host_create, enet_initialize, enet_linked_version};
 
 mod address;
 mod event;
@@ -153,7 +153,7 @@ impl Enet {
     pub fn create_host<T>(
         &self,
         address: Option<&Address>,
-        max_peer_count: enet_sys::size_t,
+        max_peer_count: usize,
         max_channel_count: ChannelLimit,
         incoming_bandwidth: BandwidthLimit,
         outgoing_bandwidth: BandwidthLimit,
@@ -175,12 +175,7 @@ impl Enet {
             return Err(Error(0));
         }
 
-        /* SAFETY: inner is a non-null pointer returned by enet_host_create,
-            enet_crc32 is a function pointer from enet_sys
-        */
-        (unsafe {
-            *inner
-        }).checksum = Some(enet_crc32);
+
 
         Ok(Host::new(self.keep_alive.clone(), inner))
     }
